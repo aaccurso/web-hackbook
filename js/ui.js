@@ -1,8 +1,8 @@
-//////////////////////////
-//
-// UI assist functions
-//
-//////////////////////////
+/*
+
+ UI assist functions
+yo
+*/
 
 //show a loading screen when launched, until we get the user's session back
 setAction("Loading Hackbook", true);

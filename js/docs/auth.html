@@ -1,0 +1,63 @@
+<!DOCTYPE html>  <html> <head>   <title>auth.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               auth.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>////////////////////////</p>
+
+<p>Authentication
+See "Logging the user in" on https://developers.facebook.com/mobile</p>
+
+<p>////////////////////////</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">user</span> <span class="o">=</span> <span class="p">[];</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Detect when Facebook tells us that the user's session has been returned</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">FB</span><span class="p">.</span><span class="nx">Event</span><span class="p">.</span><span class="nx">monitor</span><span class="p">(</span><span class="s1">&#39;auth.statusChange&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">session</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Got the user\&#39;s session: &#39;</span><span class="p">,</span> <span class="nx">session</span><span class="p">);</span>
+  
+  <span class="k">if</span> <span class="p">(</span><span class="nx">session</span> <span class="o">&amp;&amp;</span> <span class="nx">session</span><span class="p">.</span><span class="nx">status</span> <span class="o">!=</span> <span class="s1">&#39;not_authorized&#39;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">session</span><span class="p">.</span><span class="nx">authResponse</span><span class="p">[</span><span class="s1">&#39;accessToken&#39;</span><span class="p">])</span> <span class="p">{</span>
+      <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s1">&#39;connected&#39;</span><span class="p">;</span>
+      </pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Fetch user's id, name, and picture</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">FB</span><span class="p">.</span><span class="nx">api</span><span class="p">(</span><span class="s1">&#39;/me&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="nx">fields</span><span class="o">:</span> <span class="s1">&#39;name, picture&#39;</span>
+      <span class="p">},</span>
+      <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">user</span> <span class="o">=</span> <span class="nx">response</span><span class="p">;</span>
+          
+          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Got the user\&#39;s name and picture: &#39;</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+          </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>Update display of user name and picture</p>             </td>             <td class="code">               <div class="highlight"><pre>          <span class="k">if</span> <span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;user-name&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;user-name&#39;</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="k">if</span> <span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;user-picture&#39;</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;user-picture&#39;</span><span class="p">).</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">user</span><span class="p">.</span><span class="nx">picture</span><span class="p">;</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="nx">clearAction</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">session</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s1">&#39;not_connected&#39;</span><span class="p">;</span>
+  
+    <span class="nx">clearAction</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">session</span> <span class="o">&amp;&amp;</span> <span class="nx">session</span><span class="p">.</span><span class="nx">status</span> <span class="o">==</span> <span class="s1">&#39;not_authorized&#39;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s1">&#39;not_connected&#39;</span><span class="p">;</span>
+    
+    <span class="nx">clearAction</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>Prompt the user to login and ask for the 'email' permission</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">promptLogin</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">FB</span><span class="p">.</span><span class="nx">login</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="p">{</span><span class="nx">scope</span><span class="o">:</span> <span class="s1">&#39;email&#39;</span><span class="p">});</span>
+<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>This will prompt the user to grant you acess to their Facebook Likes</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">promptExtendedPermissions</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">FB</span><span class="p">.</span><span class="nx">login</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">setAction</span><span class="p">(</span><span class="s2">&quot;The &#39;user_likes&#39; permission has been granted.&quot;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+    
+    <span class="nx">setTimeout</span><span class="p">(</span><span class="s1">&#39;clearAction();&#39;</span><span class="p">,</span> <span class="mi">2000</span><span class="p">);</span>
+    
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s1">&#39;permissioned&#39;</span><span class="p">;</span>
+  <span class="p">},</span> <span class="p">{</span><span class="nx">scope</span><span class="o">:</span> <span class="s1">&#39;user_likes&#39;</span><span class="p">});</span>
+<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>See https://developers.facebook.com/docs/reference/rest/auth.revokeAuthorization/</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">uninstallApp</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">FB</span><span class="p">.</span><span class="nx">api</span><span class="p">({</span><span class="nx">method</span><span class="o">:</span> <span class="s1">&#39;auth.revokeAuthorization&#39;</span><span class="p">},</span>
+    <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">reload</span><span class="p">();</span>
+    <span class="p">});</span>
+<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>See https://developers.facebook.com/docs/reference/javascript/FB.logout/</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">logout</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">FB</span><span class="p">.</span><span class="nx">logout</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">reload</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
