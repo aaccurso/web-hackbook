@@ -54,7 +54,7 @@ function setAction(msg, hideBackground) {
     document.getElementById('action').style.opacity = '.9';
   }
   
-  document.getElementById('msg').innerHTML = FB.String.escapeHTML(msg);
+  document.getElementById('msg').innerHTML = msg;
   
   window.scrollTo(0, 1);
 }
