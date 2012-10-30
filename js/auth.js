@@ -7,7 +7,7 @@
 
 var user = [];
 
-var permissions = ['user_checkins', 'publish_checkins', 'user_likes'];
+var permissions = ['user_status', 'publish_checkins', 'user_likes'];
 
 //Detect when Facebook tells us that the user's session has been returned
 function authUser() {
@@ -50,7 +50,10 @@ function handleStatusChange(session) {
     }
 }
 
-function checkUserPermissions() {
+//Check the current permissions to set the page elements.
+//Pass back a flag to check for a speicif permission, to
+//handle the cancel detection flow.
+function checkUserPermissions(permissionToCheck) {
   var permissionsFQLQuery = permissions.join();
   FB.api({method: 'fql.query', query: 'SELECT ' + permissionsFQLQuery + ' FROM permissions WHERE uid = me()'}, 
       function(response) {
@@ -67,6 +70,15 @@ function checkUserPermissions() {
                 disabledElementName.style.display = 'block';
               }
             }
+            if (permissionToCheck) {
+              if (response[0][permissionToCheck] == 1) {
+                setAction("The '" + permissionToCheck + "' permission has been granted.", false);
+                setTimeout('clearAction();', 2000);
+              } else {
+                alert('You need to grant the ' + permissionToCheck + ' permission before using this functionality.');
+              }
+            }
+            return (response[0][permissionToCheck] == 1);
         }
   });
 }
@@ -80,11 +92,7 @@ function promptLogin() {
 function promptPermission(permission) {
   FB.login(function(response) {
     if (response.authResponse) {
-      setAction("The '" + permission + "' permission has been granted.", false);
-      checkUserPermissions();
-      setTimeout('clearAction();', 2000);
-    } else {
-      alert('You need to grant the ' + permission + ' permission before using this functionality.');
+      checkUserPermissions(permission)
     }
   }, {scope: permission});
 }
