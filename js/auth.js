@@ -7,13 +7,18 @@
 
 var user = [];
 
+var permissions = ['user_status', 'publish_checkins', 'user_likes'];
+
 //Detect when Facebook tells us that the user's session has been returned
 function authUser() {
-  FB.Event.subscribe('auth.statusChange', function(session) {
+  FB.Event.subscribe('auth.statusChange', handleStatusChange);
+}
+
+// Handle status changes
+function handleStatusChange(session) {
     console.log('Got the user\'s session: ', session);
     
-    if (session && session.status != 'not_authorized') {
-      if (session.authResponse['accessToken']) {
+    if (session.authResponse) {
         document.body.className = 'connected';
         
         //Fetch user's id, name, and picture
@@ -37,18 +42,45 @@ function authUser() {
           
           clearAction();
         });
-      }
     }
-    else if (session === undefined) {
+    else  {
       document.body.className = 'not_connected';
     
       clearAction();
     }
-    else if (session && session.status == 'not_authorized') {
-      document.body.className = 'not_connected';
-      
-      clearAction();
-    }
+}
+
+//Check the current permissions to set the page elements.
+//Pass back a flag to check for a speicif permission, to
+//handle the cancel detection flow.
+function checkUserPermissions(permissionToCheck) {
+  var permissionsFQLQuery = permissions.join();
+  FB.api({method: 'fql.query', query: 'SELECT ' + permissionsFQLQuery + ' FROM permissions WHERE uid = me()'}, 
+      function(response) {
+        if (document.body.className != 'not_connected') {
+            for (var i = 0; i < permissions.length; i++) {
+              var perm = permissions[i];
+              var enabledElementName = document.getElementById('enabled_perm_' + perm);
+              var disabledElementName = document.getElementById('disabled_perm_' + perm);
+              if (response[0][perm] == 1) {
+                enabledElementName.style.display = 'block';
+                disabledElementName.style.display = 'none';
+              } else {
+                enabledElementName.style.display = 'none';
+                disabledElementName.style.display = 'block';
+              }
+            }
+            if (permissionToCheck) {
+              if (response[0][permissionToCheck] == 1) {
+                setAction("The '" + permissionToCheck + "' permission has been granted.", false);
+                setTimeout('clearAction();', 2000);
+              } else {
+                setAction('You need to grant the ' + permissionToCheck + ' permission before using this functionality.', false);
+                setTimeout('clearAction();', 2000);
+              }
+            }
+            return (response[0][permissionToCheck] == 1);
+        }
   });
 }
 
@@ -57,23 +89,24 @@ function promptLogin() {
   FB.login(null, {scope: 'email'});
 }
 
-//This will prompt the user to grant you acess to their Facebook Likes
-function promptExtendedPermissions() {
-  FB.login(function() {
-    setAction("The 'user_likes' permission has been granted.", false);
-    
-    setTimeout('clearAction();', 2000);
-    
-    document.body.className = 'permissioned';
-  }, {scope: 'user_likes'});
+//This will prompt the user to grant you acess to a given permission
+function promptPermission(permission) {
+  FB.login(function(response) {
+    if (response.authResponse) {
+      checkUserPermissions(permission)
+    }
+  }, {scope: permission});
 }
 
-//See https://developers.facebook.com/docs/reference/rest/auth.revokeAuthorization/
+//See https://developers.facebook.com/docs/reference/api/user/#permissions
 function uninstallApp() {
-  FB.api({method: 'auth.revokeAuthorization'},
+  FB.api('/me/permissions', 'DELETE',
     function(response) {
       window.location.reload();
-    });
+      // For may instead call logout to clear
+      // cache data, ex: using in a PhoneGap app
+      //logout();
+  });
 }
 
 //See https://developers.facebook.com/docs/reference/javascript/FB.logout/
