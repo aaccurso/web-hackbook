@@ -75,7 +75,8 @@ function checkUserPermissions(permissionToCheck) {
                 setAction("The '" + permissionToCheck + "' permission has been granted.", false);
                 setTimeout('clearAction();', 2000);
               } else {
-                alert('You need to grant the ' + permissionToCheck + ' permission before using this functionality.');
+                setAction('You need to grant the ' + permissionToCheck + ' permission before using this functionality.', false);
+                setTimeout('clearAction();', 2000);
               }
             }
             return (response[0][permissionToCheck] == 1);
