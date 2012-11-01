@@ -51,18 +51,18 @@ function handleStatusChange(session) {
 }
 
 //Check the current permissions to set the page elements.
-//Pass back a flag to check for a speicif permission, to
+//Pass back a flag to check for a specific permission, to
 //handle the cancel detection flow.
 function checkUserPermissions(permissionToCheck) {
-  var permissionsFQLQuery = permissions.join();
-  FB.api({method: 'fql.query', query: 'SELECT ' + permissionsFQLQuery + ' FROM permissions WHERE uid = me()'}, 
-      function(response) {
+  var permissionsFQLQuery = 'SELECT ' + permissions.join() + ' FROM permissions WHERE uid = me()';
+  FB.api('/fql', { q: permissionsFQLQuery },
+    function(response) {
         if (document.body.className != 'not_connected') {
             for (var i = 0; i < permissions.length; i++) {
               var perm = permissions[i];
               var enabledElementName = document.getElementById('enabled_perm_' + perm);
               var disabledElementName = document.getElementById('disabled_perm_' + perm);
-              if (response[0][perm] == 1) {
+              if (response.data[0][perm] == 1) {
                 enabledElementName.style.display = 'block';
                 disabledElementName.style.display = 'none';
               } else {
@@ -71,15 +71,16 @@ function checkUserPermissions(permissionToCheck) {
               }
             }
             if (permissionToCheck) {
-              if (response[0][permissionToCheck] == 1) {
+              if (response.data[0][permissionToCheck] == 1) {
                 setAction("The '" + permissionToCheck + "' permission has been granted.", false);
                 setTimeout('clearAction();', 2000);
+                return true;
               } else {
                 setAction('You need to grant the ' + permissionToCheck + ' permission before using this functionality.', false);
                 setTimeout('clearAction();', 2000);
-              }
+              } return false;
             }
-            return (response[0][permissionToCheck] == 1);
+            return true;
         }
   });
 }
